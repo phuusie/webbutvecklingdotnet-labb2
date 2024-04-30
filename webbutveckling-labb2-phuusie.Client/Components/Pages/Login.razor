@@ -1,0 +1,50 @@
+﻿@page "/Login"
+@using webbutveckling_labb2_phuusie.Client.Services
+@inject IHttpClientFactory ClientFactory
+@inject AccountService AccountService
+@inject NavigationManager NavigationManager
+
+<div class="row justify-content-center m-5">
+    <div id="login-info" class="row d-flex justify-content-center">
+        <div class="col">
+            <h1>LOGIN</h1>
+            <div class="divider mb-4 mt-4"></div>
+            <div class="mb-3">
+                <label for="email">Email: </label><br/>
+                <input id="email" type="email" placeholder="EMAIL" @bind="AccountService.Account.Email"/>
+            </div>
+
+            <div class="mb-3">
+                <label for="password">Lösenord: </label><br/>
+                <input id="password" type="password" placeholder="LÖSENORD" @bind="AccountService.Account.Password"/>
+            </div>
+            <div class="col">
+                <button class="btn mb-3" @onclick="() => SignIn(AccountService.Account.Email, AccountService.Account.Password)">Sign In</button>
+            </div>
+            <div class="divider mb-4"></div>
+            <p>Ny Kund? <a href="signup" style="color: black;">Registrera</a></p>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AccountService.GetAccount();
+    }
+
+    async Task SignIn(string email, string password)
+    {
+        await AccountService.Login(email, password);
+
+        if (AccountService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("member");
+        }
+        else         
+        {
+            NavigationManager.NavigateTo("login");
+        }
+    }
+}

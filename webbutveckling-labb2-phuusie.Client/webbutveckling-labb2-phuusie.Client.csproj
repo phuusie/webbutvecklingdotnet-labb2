@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>webbutveckling-labb2-phuusie.Client</RootNamespace>
+    <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\scripts\app.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="blazor.bootstrap" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\webbutveckling-labb2-phuusie.Shared\webbutveckling-labb2-phuusie.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\CheckOut.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Customer.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Inbox.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\OrderConfirmation.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\OrderHistory.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Orders.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Shop.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\SignUp.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Storage.razor" />
+    <_ContentIncludedByDefault Remove="wwwroot\scripts\app.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Storage.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Customer.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\scripts\app.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Shop.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\CheckOut.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\OrderHistory.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Orders.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Inbox.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\SignUp.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\OrderConfirmation.razor" />
+  </ItemGroup>
+
+</Project>

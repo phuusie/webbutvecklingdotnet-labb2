@@ -1,0 +1,108 @@
+﻿@page "/Shop"
+@using webbutveckling_labb2_phuusie.Shared.DTOs.CategoryDTOs
+@using webbutveckling_labb2_phuusie.Shared.DTOs.ProductDTOs
+@using webbutveckling_labb2_phuusie.Client.Services
+@inject IHttpClientFactory ClientFactory
+@inject CartService CartService
+
+<div>
+    <div id="shop-header" class="row">
+        <h1>SHOP</h1>
+    </div>
+</div>
+<div class="row">
+    <div id="sidebar-shop" class="col-2">
+        <div class="row me-2">
+            <button class="d-flex btn" @onclick="LoadProducts"><strong>ALLA</strong></button>
+            @foreach (var category in Categories)
+            {
+                <button class="d-flex btn" @onclick="() => SortProducts(category.CategoryId)"><strong>@category.Name.ToUpper()</strong></button>
+            }
+        </div>
+    </div>
+    <div class="col">
+        <div id="product-list" class="col d-flex flex-wrap pt-5">
+            @if (IsSorted)
+            {
+                @foreach (var product in SortedProducts)
+                {
+                    @if (product.IsInStorage)
+                    {
+                        <div class="products m-1">
+                            <Card Class="border-0">
+                                <img class="product-img product-wrapper" src="@product.Image" alt="placeholder"/>
+                                <CardBody>
+                                    <CardTitle>@product.Name</CardTitle>
+                                    <CardSubTitle Class="mb-2 text-muted">@(product.Price)KR</CardSubTitle>
+                                    <CardText class="description">@product.Description</CardText>
+                                </CardBody>
+                            </Card>
+                            <button class="bag-icon btn" @onclick="() => CartService.AddToCart(product)"><Icon Name="IconName.BagFill" Size="IconSize.x3"></Icon></button>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                @foreach (var product in Products)
+                {
+                    @if (product.IsInStorage)
+                    {
+                        <div class="products m-1">
+                            <Card Class="border-0">
+                                <img class="product-img product-wrapper" src="@product.Image" alt="placeholder"/>
+                                <CardBody>
+                                    <CardTitle>@product.Name</CardTitle>
+                                    <CardSubTitle Class="mb-2 text-muted">@(product.Price)KR</CardSubTitle>
+                                    <CardText class="description">@product.Description</CardText>
+                                </CardBody>
+                            </Card>
+                            <button class="bag-icon btn" @onclick="() => CartService.AddToCart(product)"><Icon Name="IconName.BagFill" Size="IconSize.x3"></Icon></button>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    HttpClient Client => ClientFactory.CreateClient("storeApi");
+
+    List<GetProductsDto> Products { get; set; } = new();
+    List<GetProductsDto> SortedProducts { get; set; } = new();
+    List<GetProductCategoriesDto> Categories { get; set; } = new();
+
+    bool IsSorted { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+        await LoadCategories();
+    }
+
+    async Task LoadProducts()
+    {
+        var response = await Client.GetAsync("products");
+        var products = await response.Content.ReadFromJsonAsync<List<GetProductsDto>>();
+        IsSorted = false;
+        SortedProducts.Clear();
+        Products.Clear();
+        Products.AddRange(products);
+    }
+
+    async Task LoadCategories()
+    {
+        var response = await Client.GetAsync("products/categories");
+        var categories = await response.Content.ReadFromJsonAsync<List<GetProductCategoriesDto>>();
+        Categories.AddRange(categories);
+    }
+
+    void SortProducts(int categoryId)
+    {
+        IsSorted = true;
+        SortedProducts = Products.Where(p => p.CategoryId == categoryId).ToList();
+    }
+
+}

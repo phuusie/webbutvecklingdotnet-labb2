@@ -1,0 +1,69 @@
+﻿@page "/SignUp"
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
+@inject CustomerService CustomerService
+@using webbutveckling_labb2_phuusie.Shared.DTOs.CustomerDTOs
+@using webbutveckling_labb2_phuusie.Client.Services
+
+<div class="container mt-3">
+    <h2>Registera</h2>
+    <form>
+        <div class="form-group">
+            <label for="lastName">Email:</label>
+            <input type="text" class="form-control" id="email" @bind="NewCustomer.Email">
+        </div>
+        <div class="form-group">
+            <label for="lastName">Lösenord:</label>
+            <input type="text" class="form-control" id="password" @bind="NewCustomer.Password">
+        </div>
+        <div class="row mt-5">
+            <div class="col form-group">
+                <label for="firstName">Förnamn:</label>
+                <input type="text" class="form-control" id="firstName" @bind="NewCustomer.FirstName">
+            </div>
+            <div class="col form-group">
+                <label for="lastName">Efternamn:</label>
+                <input type="text" class="form-control" id="lastName" @bind="NewCustomer.LastName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Telefon:</label>
+            <input type="text" class="form-control" id="phone" @bind="NewCustomer.Phone">
+        </div>
+        <div class="mt-4 form-group">
+            <label for="lastName">Gatuadress:</label>
+            <input type="text" class="form-control" id="address" @bind="NewCustomer.Address">
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label for="lastName">Postnummer:</label>
+                <input type="text" class="form-control" id="postalCode" @bind="NewCustomer.PostalCode">
+            </div>
+            <div class="col form-group">
+                <label for="lastName">Stad:</label>
+                <input type="text" class="form-control" id="city" @bind="NewCustomer.City">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Land:</label>
+            <input type="text" class="form-control" id="country" @bind="NewCustomer.Country">
+        </div>
+        <button type="submit" class="btn btn-dark mt-5" @onclick="() => RegisterCustomer(NewCustomer)">Register</button>
+    </form>
+</div>
+
+@code {
+
+    PostCustomerDto NewCustomer { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CustomerService.LoadCustomers();
+    }
+
+    async Task RegisterCustomer(PostCustomerDto newCustomer)
+    {
+        await CustomerService.RegisterCustomer(newCustomer);
+    }
+
+}

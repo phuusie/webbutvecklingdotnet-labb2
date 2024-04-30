@@ -1,0 +1,193 @@
+﻿@page "/Member"
+@layout MemberLayout
+@inject AccountService AccountService
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory ClientFactory
+@using webbutveckling_labb2_phuusie.Client.Components.Layout
+@using webbutveckling_labb2_phuusie.Client.Services
+@using webbutveckling_labb2_phuusie.Shared.DTOs.CustomerDTOs
+
+<div id="member-info">
+    <div class="col d-flex">
+        <div class="col p-5">
+            <div class="row">
+                <h1>Min Profil</h1>
+                <div class="col mb-4">
+                    <div class="divider mb-5 mt-3"></div>
+                    <div class="row">
+                        <div class="col d-flex mb-2">
+                            <div class="me-auto">
+                                <label>Email:</label>
+                            </div>
+                            <input id="email" disabled="@isAccountDisabled["Email"]" @bind="Customer.Email"/>
+                            <button for="email" class="member-info-button" @onclick='() => AccountDisabled("Email")'><Icon Name="IconName.Pen"></Icon></button>
+                        </div>
+                        <div class="col d-flex">
+                            <div class="me-auto">
+                                <label>Lösenord:</label>
+                            </div>
+                            <input id="password" disabled="@isAccountDisabled["Password"]" @bind="Customer.Password"/>
+                            <button for="password" class="member-info-button" @onclick='() => AccountDisabled("Password")'><Icon Name="IconName.Pen"></Icon></button>
+                        </div>
+                    </div>
+                    <div class="divider mt-5"></div>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+            <div class="mb-3">
+                <h1>KundID: @Customer.CustomerId</h1>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Förnamn:</label>
+                </div>
+                <div>
+                    <input id="firstname" disabled="@isDisabled["FirstName"]" @bind="Customer.FirstName"/>
+                    <button for="firstname" class="member-info-button" @onclick='() => Disabled("FirstName")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Efternamn:</label>
+                </div>
+                <div>
+                    <input id="lastname" disabled="@isDisabled["LastName"]" @bind="Customer.LastName"/>
+                    <button for="lastname" class="member-info-button" @onclick='() => Disabled("LastName")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Telefon:</label>
+                </div>
+                <div>
+                    <input id="phone" disabled="@isDisabled["Phone"]" @bind="Customer.Phone"/>
+                    <button for="phone" class="member-info-button" @onclick='() => Disabled("Phone")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Adress:</label>
+                </div>
+                <div>
+                    <input id="address" disabled="@isDisabled["Address"]" @bind="Customer.Address"/>
+                    <button for="address" class="member-info-button" @onclick='() => Disabled("Address")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Postnummer:</label>
+                </div>
+                <div>
+                    <input id="postalcode" disabled="@isDisabled["PostalCode"]" @bind="Customer.PostalCode"/>
+                    <button for="postalcode" class="member-info-button" @onclick='() => Disabled("PostalCode")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Stad:</label>
+                </div>
+                <div>
+                    <input id="city" disabled="@isDisabled["City"]" @bind="Customer.City"/>
+                    <button for="city" class="member-info-button" @onclick='() => Disabled("City")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="col-5 d-flex">
+                <div class="me-auto">
+                    <label>Land:</label>
+                </div>
+                <div>
+                    <input id="country" disabled="@isDisabled["Country"]" @bind="Customer.Country"/>
+                    <button for="country" class="member-info-button" @onclick='() => Disabled("Country")'><Icon Name="IconName.Pen"></Icon></button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn border btn-dark" @onclick="Logout">LOG OUT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    HttpClient Client => ClientFactory.CreateClient("storeApi");
+
+    GetCustomerDto Customer { get; set; } = new();
+    PutCustomerDto UpdatedCustomer { get; set; } = new();
+
+    Dictionary<string, bool> isAccountDisabled = new()
+    {
+        { "Email", true },
+        { "Password", true }
+    };
+
+    Dictionary<string, bool> isDisabled = new()
+    {
+        { "FirstName", true },
+        { "LastName", true },
+        { "Phone", true },
+        { "Address", true },
+        { "PostalCode", true },
+        { "City", true },
+        { "Country", true }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AccountService.GetAccount();
+        await LoadCustomer();
+
+        if (!AccountService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("login");
+        }
+    }
+
+    async Task LoadCustomer()
+    {
+        var httpClient = ClientFactory.CreateClient("storeApi");
+        var response = await httpClient.GetAsync("customers");
+        var customers = await response.Content.ReadFromJsonAsync<List<GetCustomerDto>>();
+        Customer = customers.FirstOrDefault(c => c.CustomerId == AccountService.Account.Id);
+    }
+
+    async Task UpdateCustomer()
+    {
+
+        UpdatedCustomer = new()
+        {
+            CustomerId = Customer.CustomerId,
+            Email = Customer.Email,
+            Password = Customer.Password,
+            FirstName = Customer.FirstName,
+            LastName = Customer.LastName,
+            Phone = Customer.Phone,
+            Address = Customer.Address,
+            PostalCode = Customer.PostalCode,
+            City = Customer.City,
+            Country = Customer.Country
+        };
+
+        await Client.PutAsJsonAsync($"customers/id={Customer.CustomerId}", UpdatedCustomer);
+    }
+
+    async void AccountDisabled(string property)
+    {
+        isAccountDisabled[property] = !isAccountDisabled[property];
+        await UpdateCustomer();
+        await LoadCustomer();
+    }
+
+    async void Disabled(string property)
+    {
+        isDisabled[property] = !isDisabled[property];
+        await UpdateCustomer();
+        await LoadCustomer();
+    }
+
+    async void Logout()
+    {
+        await AccountService.Logout();
+        NavigationManager.NavigateTo("login");
+    }
+}

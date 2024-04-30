@@ -1,0 +1,129 @@
+﻿@page "/"
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Home</PageTitle>
+
+<div id="home-carousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        @for (int i = 0; i < images.Count; i++)
+        {
+            <button type="button" data-bs-target="#home-carousel" data-bs-slide-to="@i" class="@((i == 0) ? "active" : "")"></button>
+        }
+    </div>
+
+    <div class="carousel-inner">
+        @foreach (var image in images)
+        {
+            <div class="carousel-item @(image == images[0] ? "active" : "")">
+                <img src="@image" alt="Slide" class="d-block w-100 h-100">
+            </div>
+        }
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#home-carousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#home-carousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<h1 class="row justify-content-center aliugn-items-center pt-5">HOME FURNITURE</h1>
+
+<div class="d-flex flex-wrap m-5 justify-content-center align-items-center">
+    <Card Class="m-5 border-0" Style="width:26rem;">
+        <img class="rounded-top" src="/assets/front/saarinenround.png" alt="placeholder"/>
+        <CardBody>
+            <CardTitle>SAARINEN ROUND</CardTitle>
+            <CardSubTitle Class="mb-2 text-muted">12 600KR</CardSubTitle>
+            <CardText>Some quick example text to build on the card title and make up the bulk of the card's content.</CardText>
+        </CardBody>
+    </Card>
+    <Card Class="m-5 border-0" Style="width:26rem;">
+        <img class="rounded-top" src="/assets/front/plinthtall.png" alt="placeholder"/>
+        <CardBody>
+            <CardTitle>PLINTH TALL</CardTitle>
+            <CardSubTitle Class="mb-2 text-muted">14 347KR</CardSubTitle>
+            <CardText>Some quick example text to build on the card title and make up the bulk of the card's content.</CardText>
+        </CardBody>
+    </Card>
+</div>
+
+<div class="line"></div>
+
+<div>
+    <nav>
+        <div class="home-links links justify-content-center">
+            <a class="m-5" href="#">MÖBLER</a>
+            <a class="m-5" href="#">UTEMÖBLER</a>
+            <a class="m-5" href="#">BELYSNING</a>
+            <a class="m-5" href="#">KÖK</a>
+            <a class="m-5" href="#">TEXTILER</a>
+        </div>
+    </nav>
+</div>
+
+<div class="home-highlight row mb-5">
+    <div class="col">
+        <img id="highlight" src="assets/front/belysning.png" alt="highlight"/>
+    </div>
+    <div class="col">
+        <div class="row">
+            <Card Class="border-0" Style="width:25rem;">
+                <CardBody>
+                    <CardTitle>DESIGN ICONS - UPPTÄCK VÅRA IKONISKA LAMPOR</CardTitle>
+                    <CardText>I vårt breda sortiment av belysning finns allt från klassiska och tidlösa lampor till modern och konstnärlig belysning. Här har vi samlat några av våra mest ikoniska lampor – upptäck flera designikoner från oss.</CardText>
+                </CardBody>
+            </Card>
+        </div>
+        <span class="p-3">
+            <a class="text-dark" href="#">Belysningar <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" /></svg></a>
+        </span>
+    </div>
+</div>
+
+<div class="pt-5">
+    <p>
+        <strong>
+            DESIGNMÖBLER OCH INREDNING SEDAN 1912
+            MÖBLER OCH INREDNINGSDETALJER FRÅN HELA VÄRLDEN
+        </strong><br/>
+        Stig in. Våra dörrar på Nybrogatan 11 har varit öppna i över hundra år. Numera har vi en butik i Göteborg på Flöjelbergsgatan 20A och sedan en tid tillbaka gör vi även världsledande design tillgängligt online. Väl här inne möts du av designmöbler och inredningsdetaljer från hela världen. En samling unika objekt som vi har tagit hem från jordens alla hörn. Varenda möbel och detalj du ser är handplockad från våra hundratals välkända leverantörer och designers. Gemensamt för alla är hantverket som gjort dem till tidlösa klassiker eller framtida stjärnskott.
+        <br/>
+        <br/>
+        <strong>
+            SPECIALISTER PÅ SÅVÄL ITALIENSK SOM SKANDINAVISK DESIGN</strong><br />
+        Våra italienska vänner på Flexform, B&B Italia och Cassina producerar verk från välkända Piero Lissoni, Antonio Citterio, Patricia Urquiola och många fler. Danska Fritz Hansen har med hjälp av Arne Jacobsen och Poul Kjaerholm skapat tidlösa möbler som PK-serien och Sjuanstolen. Vitra och ClassiCon är exempel från Schweiz och Tyskland, producenterna av klassiker som Eames Plastic Chair och Bibendum. De har alla, tillsammans med våra många nya tillskott som Roll & Hill och Gubi en självklar plats i vårt sortiment. Vår långa historia har gett oss erfarenhet kring såväl italiensk som skandinavisk design.
+        <br/>
+        <br />
+        <strong>
+            ETT HELTÄCKANDE SORTIMENT
+        </strong><br />
+        När du sedan ska skapa din inredning är du färdig först när allt från grunden till de minsta detaljerna komponerats ihop till en harmonisk helhet. Hos oss hittar du allt. Vi har soffor, fåtöljer och bokhyllor. Även stolar, pallar, bord och belysning. Samtliga viktiga delar för att skapa basen i hemmet. Med hjälp av krukor, kuddar, doftljus och böcker får du sedan till det sista lagret för en komplett inredning. På senare tid har vi även adderat ett stort urval av utemöbler, sängar, hallmöbler, kök och garderober till vår katalog. Vi har över 150 exklusiva varumärken vilket ger ett heltäckande sortiment. Tack vare vår långa historia har vi kunskapen som krävs för att hjälpa dig att hitta den design som håller högst nivå. Vi säljer bara det bästa och enbart möbler från erkända formgivare. Naturligtvis är allt vi säljer äkta varor som är original.
+        <br/>
+        <br />
+        <strong>
+            VI HJÄLPER DIG ATT INREDA DITT HEM</strong><br />
+        Behöver du hjälp med hela din inredning? Då är du välkommen in till någon av våra butiker i Stockholm på Nybrogatan 11 eller i Göteborg på Flöjelbergsgatan 20A. Oavsett var du bor i landet kan du alltid kontakta oss för att få inredningshjälp, våra inredare finns redo att hjälpa till med ditt projekt vare sig det är litet eller stort.
+        <br/>
+        <br />
+        <strong>
+            BRA DESIGN TILL RÄTT PRIS</strong><br/>
+        Att erbjuda design till rätt pris är en viktig del av vår filosofi. Om du hittar samma vara till ett lägre pris hos en annan återförsäljare matchar vi det som tack för att du uppmärksammar oss om detta. Läs mer om villkoren och hur du matchar priset.
+        <br/>
+        <br/>
+        Vi har samlat det bästa på en plats. För att du ska kunna uttrycka din designidentitet fullt ut. Vår erfarenhet och kunskap finns alltid till ditt förfogande. Om du har några frågor, hör av dig.
+    </p>
+</div>
+
+@code
+{
+    private List<string> images = new() {"/assets/image/1.png", "/assets/image/2.png", "/assets/image/3.png"};
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpClient = ClientFactory.CreateClient("storeApi");
+        var response = await httpClient.GetAsync("products");
+        var bodyAsString = await response.Content.ReadAsStringAsync();
+    }
+}

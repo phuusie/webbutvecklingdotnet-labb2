@@ -1,0 +1,483 @@
+﻿@page "/Storage"
+@using webbutveckling_labb2_phuusie.Shared.DTOs.ProductDTOs
+@using webbutveckling_labb2_phuusie.Shared.DTOs.CategoryDTOs
+@using webbutveckling_labb2_phuusie.Client.Components.Layout
+@using webbutveckling_labb2_phuusie.Client.Services
+@layout MemberLayout
+@inject IHttpClientFactory ClientFactory
+@inject ProductService ProductService
+
+<Tabs EnableFadeEffect="true" NavStyle="NavStyle.Underline">
+<Tab Title="Produkter">
+    <Content>
+        @if (SelectedProduct.ProductId != 0)
+        {
+            if (IsEditing)
+            {
+                <div class="container mt-3">
+                    <h2>Updatera produkt</h2>
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control" id="name" @bind="SelectedProduct.Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Pris:</label>
+                            <input type="text" class="form-control" id="price" @bind="SelectedProduct.Price">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Kategori:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="d-flex">
+                                <Switch Value="IsNewCategory" ValueExpression="() => IsNewCategory" ValueChanged="SwitchCategoryChanged">
+                                    <Button Color="ButtonColor.Dark" @onclick="ToggleSwitchCategory"></Button>
+                                </Switch>
+                                <label class="d-flex align-items-center">Lägg till ny kategori</label>
+                            </div>
+                            @if (IsNewCategory)
+                            {
+                                <div>
+                                    <input type="text" class="form-control" id="newCategory" @bind="NewCategory.Name">
+                                </div>
+                            }
+                            else
+                            {
+                                <select class="form-control" id="category" @bind="SelectedProduct.CategoryId">
+                                    <option value="">Välj kategori...</option>
+                                    @if (ProductService.Categories is not null)
+                                    {
+                                        @foreach (var category in ProductService.Categories)
+                                        {
+                                            <option value="@category.CategoryId" selected="@SelectedProduct.CategoryId">@category.Name</option>
+                                        }
+                                    }
+
+                                </select>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Beskrivning:</label>
+                            <input type="text" class="form-control" id="description" @bind="SelectedProduct.Description">
+                        </div>
+                        <div class="form-group mt-3">
+                            <div class="d-flex">
+                                <Switch Value="IsInStorage" ValueExpression="() => IsInStorage" ValueChanged="SwitchStorageChanged">
+                                    <Button Color="ButtonColor.Dark" @onclick="ToggleSwitchStorage"></Button>
+                                </Switch>
+                                <label class="d-flex align-items-center">Lager</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-3" @onclick='() => SaveEdit("product")'><Icon Name="IconName.Check"></Icon></button>
+                        <button type="submit" class="btn btn-warning mt-3" @onclick='StopEdit'><Icon Name="IconName.X"></Icon></button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex row">
+                    <div class="col-8 container mt-3">
+                        <Card>
+                            <CardBody>
+                                <CardTitle>@SelectedProduct.Name</CardTitle>
+                                <CardText><strong>ProduktID:</strong> @SelectedProduct.ProductId</CardText>
+                                <CardText>
+                                    <strong>Pris:</strong> @(SelectedProduct.Price)kr<br /><strong>Kategori: </strong>
+                                    @if (SelectedProduct.Category is null)
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                    else
+                                    {
+                                        @SelectedProduct.Category.Name
+                                    }
+                                </CardText>
+                                <CardText>
+                                    <strong>Beskrivning:</strong><br />
+                                    @SelectedProduct.Description
+                                </CardText>
+                                <CardText>
+                                    <strong>Lager Status:</strong>
+                                    <div>
+                                        <label style="width: 100px; height: 20px; border: 1px solid black; background-color: @GetStatusColor(SelectedProduct.IsInStorage)"
+                                               @onclick="StorageStatus">
+                                        </label>
+                                    </div>
+
+                                </CardText>
+                                <button class="btn border btn-dark" @onclick="StartEdit">Ändra information</button>
+                                <button class="btn border btn-danger" @onclick="() => RemoveProduct(SelectedProduct.ProductId)"><Icon Name="IconName.Trash"></Icon></button>
+                            </CardBody>
+                        </Card>
+                    </div>
+                    <div class="col mt-3 d-flex justify-content-center align-items-center">
+                        <Card Style="height:100%;">
+                            <CardBody Style="height:100%">
+                                <img class="product-img" src="@SelectedProduct.Image" />
+                            </CardBody>
+                        </Card>
+                    </div>
+                </div>
+                <div class="line"></div>
+            }
+        }
+        <div class="mt-3 ms-3">
+            <h2>Produkter</h2>
+            <br/>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Namn</th>
+                    <th>Pris</th>
+                    <th>Kategori</th>
+                    <th>Beskrivning</th>
+                    <th>Lager Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var product in ProductService.Products)
+                {
+                    <tr @onclick='() => OnRowClick(product.ProductId.ToString(), "product")'>
+                        <td>@product.ProductId</td>
+                        <td>@product.Name</td>
+                        <td>@(product.Price)kr </td>
+                        <td>
+                            @if (product.Category is null)
+                            {
+                                <span>N/A</span>
+                            }
+                            else
+                            {
+                                @product.Category.Name
+                            }
+                        </td>
+                        <td class="description">@product.Description</td>
+                        <td>
+                            <div style="width: 50px; height: 15px; background-color: @GetStatusColor(product.IsInStorage)"></div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </Content>
+</Tab>
+<Tab Title="Kategorier">
+    <Content>
+        <div class="row d-flex">
+            <div class="col-3 mt-3">
+                <h2>Kategori</h2><br/>
+                <div>
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Kategori</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var category in ProductService.Categories)
+                        {
+                            <tr @onclick='() => OnRowClick(category.CategoryId.ToString(), "category")'>
+                                <td>@category.Name</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col">
+                @if (SelectedCategory.CategoryId is not 0)
+                {
+                    <div class="d-flex mt-3 align-items-start">
+                        @if (IsEditing)
+                        {
+                            <input type="text" class="form-control mb-2" @bind="SelectedCategory.Name">
+                            <button class="btn btn-success" @onclick='() => SaveEdit("category")'><Icon Name="IconName.Check"></Icon></button>
+                            <button class="btn btn-warning" @onclick="StopEdit"><Icon Name="IconName.X"></Icon></button>
+                        }
+                        else
+                        {
+                            <h2>@SelectedCategory.Name</h2>
+                            <button class="btn" @onclick="StartEdit"><Icon Name="IconName.Pen"></Icon></button>
+                            <button class="btn btn-danger border ms-auto"><Icon Name="IconName.Trash" @onclick="() => RemoveCategory(SelectedCategory.CategoryId)"></Icon></button>
+                        }
+                    </div>
+                    <br/>
+                    <div>
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Produkt</th>
+                                <th>Pris</th>
+                                <th>Lager Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var product in SelectedCategoryProducts)
+                            {
+                                <tr>
+                                    <td>@product.ProductId</td>
+                                    <td>@product.Name</td>
+                                    <td>@product.Price</td>
+                                    <td>
+                                        <div style="width: 50px; height: 15px; background-color: @GetStatusColor(product.IsInStorage)"></div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div >
+        </div>
+    </Content>
+</Tab>
+<Tab Title="Lager">
+    <Content>
+        <div class="container mt-3">
+            <h2>Hantera ny produkt</h2>
+            <form>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" @bind="NewProduct.Name">
+                </div>
+                <div class="form-group">
+                    <label for="price">Pris:</label>
+                    <input type="text" class="form-control" id="price" @bind="ProductPrice">
+                </div>
+                <div class="form-group">
+                    <label for="price">Kategori:</label>
+                </div>
+                <div class="form-group">
+                    <div class="d-flex">
+                        <Switch Value="IsNewCategory" ValueExpression="() => IsNewCategory" ValueChanged="SwitchCategoryChanged">
+                            <Button Color="ButtonColor.Dark" @onclick="ToggleSwitchCategory"></Button>
+                        </Switch>
+                        <label class="d-flex align-items-center">Lägg till ny kategori</label>
+                    </div>
+                    @if (IsNewCategory)
+                    {
+                        <div>
+                            <input type="text" class="form-control" id="newCategory" @bind="NewCategory.Name">
+                        </div>
+                    }
+                    else
+                    {
+                        <select class="form-control" id="category" @bind="NewProduct.CategoryId">
+                            <option value="">Välj kategori...</option>
+                            @if (ProductService.Categories is not null)
+                            {
+                                @foreach (var category in ProductService.Categories)
+                                {
+                                    <option value="@category.CategoryId">@category.Name</option>
+                                }
+                            }
+
+                        </select>
+                    }
+                </div>
+                <div class="form-group">
+                    <label for="name">Beskrivning:</label>
+                    <input type="text" class="form-control" id="description" @bind="NewProduct.Description">
+                </div>
+                <div class="form-group mt-3">
+                    <div class="d-flex">
+                        <Switch Value="IsInStorage" ValueExpression="() => IsInStorage" ValueChanged="SwitchStorageChanged">
+                            <Button Color="ButtonColor.Dark" @onclick="ToggleSwitchStorage"></Button>
+                        </Switch>
+                        <label class="d-flex align-items-center">Lager</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-dark mt-5" @onclick="() => AddProduct(NewProduct)">Lägg till i lager</button>
+            </form>
+        </div>
+    </Content>
+</Tab>
+</Tabs>
+
+
+@code {
+    
+    List<GetProductsDto> SelectedCategoryProducts { get; set; } = new();
+
+    GetProductsDto SelectedProduct { get; set; } = new();
+    GetProductCategoriesDto SelectedCategory { get; set; } = new();
+
+    PostProductDto NewProduct { get; set; } = new();
+    PostProdutCategoryDto NewCategory { get; set; } = new();
+
+    PutProductDto UpdatedProduct { get; set; } = new();
+    PutProductCategoryDto UpdatedCategory { get; set; } = new();
+
+    string ProductPrice { get; set; }
+    string ImageName { get; set; }
+
+    bool IsNewCategory { get; set; }
+    bool IsInStorage { get; set; }
+    bool IsEditing { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ProductService.LoadProducts();
+        await ProductService.LoadCategories();
+    }
+
+    void LoadCategoryProducts()
+    {
+        var selectedCategory = ProductService.Products.Where(p => p.CategoryId == SelectedCategory.CategoryId);
+        SelectedCategoryProducts.AddRange(selectedCategory);
+    }
+
+    async Task AddProduct(PostProductDto newProduct)
+    {
+        await AddCategory();
+
+        var newCategory = ProductService.Categories.FirstOrDefault(c => c.Name == NewCategory.Name);
+
+        if (double.TryParse(ProductPrice, out double price))
+        {
+            newProduct.Price = price;
+        }
+
+        if (newCategory is not null)
+        {
+            newProduct.CategoryId = newCategory.CategoryId;
+        }
+
+        ImageName = newProduct.Name.Replace(" ", "").ToLower();
+
+        newProduct.Image = $"/assets/image/products/{ImageName}.png";
+        newProduct.IsInStorage = IsInStorage;
+
+        await ProductService.AddProduct(newProduct);
+    }
+
+    async Task AddCategory()
+    {
+        await ProductService.AddCategory(NewCategory);
+    }
+
+    async Task UpdateProduct()
+    {
+        ImageName = SelectedProduct.Name.Replace(" ", "").ToLower();
+        SelectedProduct.Image = $"/assets/image/products/{ImageName}.png";
+
+        if (IsNewCategory)
+        {
+            await ProductService.AddCategory(NewCategory); 
+            var newCategory = ProductService.Categories.FirstOrDefault(c => c.Name == NewCategory.Name).CategoryId;
+
+
+            UpdatedProduct = new()
+            {
+                ProductId = SelectedProduct.ProductId,
+                Name = SelectedProduct.Name,
+                Price = SelectedProduct.Price,
+                Description = SelectedProduct.Description,
+                CategoryId = newCategory,
+                IsInStorage = SelectedProduct.IsInStorage,
+                Image = SelectedProduct.Image
+            };
+        }
+        else
+        {
+            UpdatedProduct = new()
+            {
+                ProductId = SelectedProduct.ProductId,
+                Name = SelectedProduct.Name,
+                Price = SelectedProduct.Price,
+                Description = SelectedProduct.Description,
+                CategoryId = SelectedProduct.CategoryId,
+                IsInStorage = SelectedProduct.IsInStorage,
+                Image = SelectedProduct.Image
+            };
+        }
+
+        await ProductService.UpdateProduct(UpdatedProduct);
+    }
+
+    async Task UpdateCategory()
+    {
+        UpdatedCategory = new()
+        {
+            Name = SelectedCategory.Name
+        };
+
+        await ProductService.UpdateCategory(UpdatedCategory);
+    }
+
+
+    async Task RemoveProduct(int productId)
+    {
+        await ProductService.DeleteProduct(productId);
+    }
+
+    async Task RemoveCategory(int categoryId)
+    {
+        await ProductService.DeleteCategory(categoryId);
+    }
+
+    void OnRowClick(string Id, string type)
+    {
+        if (type == "category")
+        {
+            SelectedCategory = ProductService.Categories.FirstOrDefault(c => c.CategoryId.ToString() == Id);
+            SelectedCategoryProducts.Clear();
+            LoadCategoryProducts();
+        }
+        else
+        {
+            SelectedProduct = ProductService.Products.FirstOrDefault(p => p.ProductId.ToString() == Id);
+        }
+    }
+
+    string GetStatusColor(bool isInStorage)
+    {
+        return isInStorage ? "#9AB87A" : "#E55934";
+    }
+
+    async Task StorageStatus()
+    {
+        SelectedProduct.IsInStorage = !SelectedProduct.IsInStorage;
+        await UpdateProduct();
+    }
+
+    void ToggleSwitchStorage() => IsInStorage = !IsInStorage;
+    void ToggleSwitchCategory() => IsNewCategory = !IsNewCategory;
+
+    void SwitchStorageChanged(bool value)
+    {
+        IsInStorage = value;
+    }
+
+    void SwitchCategoryChanged(bool value)
+    {
+        IsNewCategory = value;
+    }
+
+    void StartEdit()
+    {
+        IsEditing = true;
+    }
+
+    async Task SaveEdit(string name)
+    {
+        IsEditing = false;
+
+        if (name == "category")
+        { 
+            await UpdateCategory();
+        }
+        else if (name == "product")
+        {
+            await UpdateProduct();
+        }
+    }
+
+    private void StopEdit()
+    {
+        IsEditing = false;
+    }
+}

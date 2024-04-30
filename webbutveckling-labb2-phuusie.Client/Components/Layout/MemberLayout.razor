@@ -1,0 +1,50 @@
+﻿@using webbutveckling_labb2_phuusie.Client.Services
+@inherits LayoutComponentBase
+@layout MainLayout
+@inject IHttpClientFactory ClientFactory
+@inject AccountService AccountService
+@inject NavigationManager NavigationManager
+
+
+<h1 class="mt-5 mb-5">Välkommen, @AccountService.Account.FirstName @AccountService.Account.LastName</h1>
+<div class="line"></div>
+
+<div class="row d-flex">
+    <div id="menu" class="col-3 mt-4">
+        <ul class="menu">
+            <a href="member" class="btn">
+                <li><Icon Name="IconName.Person"></Icon> <span>Min Profil</span></li></a>
+            <a href="orderhistory" class="btn">
+                <li><Icon Name="IconName.Cart"></Icon> <span>Orderhistorik</span></li></a>
+            <a href="inbox" class="btn">
+                <li><Icon Name="IconName.Postcard"></Icon> <span>Meddelanden</span></li></a>
+            
+            @if (AccountService.Account.IsAdmin)
+            {
+                <a href="customer" class="btn mt-5">
+                    <li><Icon Name="IconName.People"></Icon> <span>Medlemmar</span></li></a>
+                <a href="storage" class="btn">
+                    <li><Icon Name="IconName.Box2"></Icon> <span>Lager</span></li></a>
+                <a href="orders" class="btn">
+                    <li><Icon Name="IconName.Collection"></Icon> <span>Ordrar</span></li></a>
+            }
+
+        </ul>
+    </div>
+    <div class="col container">
+        @Body
+    </div>
+</div>
+
+@code {
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await AccountService.GetAccount();
+
+        if (!AccountService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("login");
+        }
+    }
+}

@@ -1,0 +1,105 @@
+﻿@page "/Orders"
+@using webbutveckling_labb2_phuusie.Client.Components.Layout
+@using webbutveckling_labb2_phuusie.Client.Services
+@using webbutveckling_labb2_phuusie.Shared.DTOs.OrderDTOs
+@layout MemberLayout
+@inject OrderService OrderService
+
+
+<div class="row d-flex p-2">
+    <div class="col-4 mt-3">
+        <h2>Order:</h2><br />
+        <div>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Kund</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in OrderService.Orders)
+                    {
+                        <tr @onclick="() => OnRowClick(order.OrderId)">
+                            <td>@order.OrderId</td>
+                            <td>@order.CustomerId - @order.Customer.FirstName @order.Customer.LastName</td>
+                            <td>@(TotalPrice(order.OrderId))KR</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col">
+        @if (SelectedOrder.OrderId is not 0)
+        {
+            <div class="d-flex mt-3 align-items-start">
+                <h2>@SelectedOrder.OrderId</h2>
+                <button class="btn btn-danger border ms-auto"><Icon Name="IconName.Trash" @onclick="() => DeleteOrder(SelectedOrder.OrderId)"></Icon></button>
+
+            </div>
+            <br />
+            <div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produkt</th>
+                            <th>Pris</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in SelectedOrderProducts)
+                        {
+                            <tr>
+                                <td>@product.ProductId</td>
+                                <td>@product.Product.Name</td>
+                                <td>@(product.Product.Price)KR</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+
+    List<GetOrderProductsDto> SelectedOrderProducts = new();
+    GetOrderDto SelectedOrder = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await OrderService.LoadOrders();
+        await OrderService.LoadOrderProducts();
+
+    }
+
+    void OnRowClick(int id)
+    {
+        SelectedOrder = OrderService.Orders.FirstOrDefault(order => order.OrderId == id);
+        SelectedOrderProducts = OrderService.OrderProducts.Where(op => op.OrderId == id).ToList();
+    }
+
+    async Task DeleteOrder(int id)
+    {
+        await OrderService.DeleteOrder(id);
+        SelectedOrder = new();
+        SelectedOrderProducts = new();
+    }
+
+    double TotalPrice(int id)
+    {
+        double total = 0;
+        var order = OrderService.OrderProducts.Where(op => op.OrderId == id).ToList();
+        foreach (var product in order)
+        {
+            total += product.Product.Price;
+        }
+
+        return total;
+    }
+}

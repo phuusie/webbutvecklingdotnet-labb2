@@ -1,0 +1,206 @@
+﻿@using webbutveckling_labb2_phuusie.Client.Services
+@inherits LayoutComponentBase
+@inject IHttpClientFactory ClientFactory
+@inject CartService CartService
+@inject AccountService AccountService
+@inject NavigationManager NavigationManager
+
+<section id="header">
+    <div>
+        <nav class="top-wrap">
+            <div class="ps-3 pe-3 d-flex row">
+                <div class="col d-flex mt-1">
+                    <a href="#">Kundservice</a>
+                    <a href="#">Hitta butik</a>
+                </div>
+                <div id="login" class="col d-flex justify-content-end mt-1">
+                    @if (!AccountService.IsLoggedIn)
+                    {
+                        <input type="email" placeholder="EMAIL" @bind="Email"/>
+                        <input type="password" placeholder="LÖSENORD" @bind="Password"/>
+                        <button @onclick="() => Login(Email, Password)">LOGIN</button>
+                        <button><a href="signup">REGISTRERA</a></button>
+                    }
+                    else if(AccountService.IsLoggedIn)
+                    {
+                        <div class="me-3">@AccountService.Account.Id - <strong>@AccountService.Account.LastName, @AccountService.Account.FirstName</strong></div>
+                        <button @onclick="Logout">LOGGA UT</button>
+                    }
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div>
+        <nav class="header">
+            <div class="links">
+                <div>
+                    <form>
+                        <div class="search">
+                            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
+                            <input class="search-input" type="search" placeholder="SÖK..."/>
+                        </div>
+                    </form>
+                </div>
+                <div class="logo text-light">
+                    <h1>HOME</h1>
+                </div>
+                <div class="icon-links">
+                    <a href="#" @onclick="IsLoggedIn"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/></svg></a>
+                    <a href="#"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"/></svg></a>
+                    <a href="#" data-bs-toggle="offcanvas" data-bs-target="#cart" @onclick="CartService.GetCart"> <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/></svg></a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div>
+        <nav class="bottom-wrap">
+            <input type="checkbox" id="sidebar-active"/>
+            <label for="sidebar-active" class="open-sidebar-button">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
+            </label>
+            <label id="overlay" for="sidebar-active"></label>
+
+            <div class="justify-content-center links-container">
+                <label for="sidebar-active" class="close-sidebar-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+                </label>
+                <a href="#">HOME</a>
+                <a href="#">ABOUT</a>
+                <a href="shop">SHOP</a>
+                <a class="sale" href="#">SALE</a>
+                <a href="#">LIMITED</a>
+            </div>
+        </nav>
+    </div>
+</section>
+
+<div class="line"></div>
+
+<section id="bag">
+    <div class="offcanvas offcanvas-end" id="cart">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Shopping bag</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="line"></div>
+        <div id="cart-body" class="offcanvas-body">
+            @foreach (var product in CartService.Cart)
+            {
+                <div class="d-flex row">
+                    <div class="d-flex col">
+                        <img id="cart-product-img" src="@product.Image" alt="product-img"/>
+                        <div class="row">
+                            <div class="d-flex row">
+                                <p><strong>@product.Name</strong></p>
+                                <div>
+                                    Antal: <strong>0</strong><br/>
+                                    Total: <strong>@(product.Price)KR</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex col-1 justify-content-end align-items-start">
+                        <button class="cart-body-button" @onclick="() => CartService.RemoveFromCart(product)"><Icon Name="IconName.Trash"></Icon></button>
+                    </div>
+                </div>
+                <div class="divider"></div>
+            }
+        </div>
+        <div class="d-flex align-items-end m-5">
+            <button class="me-auto btn info-button" @onclick="CheckOutPage">BETALA</button>
+            <button class="btn info-button" @onclick="ClearCart">RENSA</button>
+        </div>
+    </div>
+</section>
+
+<section id="main">
+    <div class="container">
+        @Body
+    </div>
+</section>
+
+<div class="line"></div>
+
+<section id="footer">
+    <div class="footer d-flex row pe-5 ps-5">
+        <div class="col-1 footer-links">
+            <a href="#">Kundservice</a>
+            <a href="#">Hitta butik</a>
+            <a href="#">Land</a>
+            <a href="#">Om oss</a>
+            <a href="#">Jobba hos oss</a>
+            <a href="#">Press</a>
+            <a href="#">Integritetspolicy</a>
+        </div>
+        <div class="col-1 footer-links">
+            <a href="#">Köpvillkor</a>
+            <a href="#">Klarna</a>
+            <a href="#">Swish</a>
+            <a href="#">Visa</a>
+            <a href="#">Mastercard</a>
+            <a href="#">Retur</a>
+            <a href="#">Reklamation</a>
+            <a href="#">Cookies</a>
+        </div>
+        <div class="col-1 footer-links">
+            <a href="#">Instagram</a>
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">Youtube</a>
+        </div>
+        <div class="col d-flex justify-content-end align-items-start">
+            <button class="btn border rounded-0 btn-dark pe-5 ps-5">SUBSCRIBE</button>
+        </div>
+    </div>
+</section>
+
+@code
+{
+    string Email { get; set; } = "";
+    string Password { get; set; } = "";
+
+    bool IsOpen { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.GetCart();
+        await AccountService.GetAccount();
+    }
+
+    async void ClearCart()
+    {
+        await CartService.ClearCart();
+        await CartService.GetCart();
+    }
+
+    void CheckOutPage()
+    {
+        NavigationManager.NavigateTo("checkout");
+        IsOpen = false;
+    }
+
+    async void Login(string email, string password)
+    {
+        await AccountService.Login(email, password);
+    }
+
+    async void Logout()
+    {
+        await AccountService.Logout();
+        NavigationManager.NavigateTo("login");
+    }
+
+   void IsLoggedIn()
+    {
+        if(AccountService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("member");
+        }
+        else
+        { 
+            NavigationManager.NavigateTo("login");
+        }
+    }
+}

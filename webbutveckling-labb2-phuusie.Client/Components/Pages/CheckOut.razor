@@ -1,0 +1,183 @@
+﻿@page "/CheckOut"
+@using webbutveckling_labb2_phuusie.Client.Services
+@using webbutveckling_labb2_phuusie.Shared.DTOs.CustomerDTOs
+@using webbutveckling_labb2_phuusie.Shared.DTOs.OrderDTOs
+@using webbutveckling_labb2_phuusie.Shared.Entities
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
+@inject CartService CartService
+@inject AccountService AccountService
+@inject CustomerService CustomerService
+@inject OrderService OrderService
+
+
+<div class="row d-flex">
+    <div id="payment" class="col">
+        <h1 class="mt-3 mb-5">Kassa</h1>
+        <div class="divider mb-5"></div>
+        @if (Customer is not null)
+        {
+            <div class="col mb-3">
+                <h3>Leverans</h3>
+                <div class="mt-4 mb-4"><input type="text" placeholder="Leverans" @bind="Customer.Country"/></div>
+            </div>
+            <div id="payment-info">
+                <div class="row m-2">
+                    <h6>Mottagaradress:</h6>
+                    <div class="col d-flex">
+                        <div class="col me-1"><input type="text" placeholder="Förnamn" @bind="Customer.FirstName"/></div>
+                        <div class="col"><input type="text" placeholder="Efternamn" @bind="Customer.LastName"/></div>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Gatuadress" @bind="Customer.Address"/>
+                    </div>
+                    <div class="col d-flex">
+                        <div class="col me-1"><input type="text" placeholder="Postnummer" @bind="Customer.PostalCode"/></div>
+                        <div class="col"><input type="text" placeholder="Stad" @bind="Customer.City"/></div>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Telefonnummer" @bind="Customer.Phone"/>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Emailadress" @bind="Customer.Email"/>
+                    </div>
+                    <div>
+                        <button class="mb-5" @onclick="PlaceOrder">Betala</button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col mb-3">
+                <h3>Leverans</h3>
+                <div class="mt-4 mb-4"><input type="text" placeholder="Leverans"/></div>
+            </div>
+            <div id="payment-info">
+                <div class="row m-2">
+                    <h6>Mottagaradress:</h6>
+                    <div class="col d-flex">
+                        <div class="col me-1"><input type="text" placeholder="Förnamn"/></div>
+                        <div class="col"><input type="text" placeholder="Efternamn"/></div>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Gatuadress" />
+                    </div>
+                    <div class="col d-flex">
+                        <div class="col me-1"><input type="text" placeholder="Postnummer"/></div>
+                        <div class="col"><input type="text" placeholder="Stad"/></div>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Telefonnummer"/>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Emailadress"/>
+                    </div>
+                    <div>
+                        <button class="mb-5">Betala</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div id="cart-list" class="col mt-3 ms-5">
+        <h3>Beställningsöversikt</h3>
+        <div id="checkout-order">
+            @if(CartService.Cart.Count == 0)
+            {
+                <p>Din varukorg är tom</p>
+            }
+            else
+            {
+                @foreach (var item in CartService.Cart)
+                {
+                    <div class="divider mb-3"></div>
+                    <div class="row">
+                        <div class="col-2">
+                            <img src="@item.Image" alt="placeholder"/>
+                        </div>
+                        <div class="col">
+                            <div class="col d-flex">
+                                <div class="me-auto">
+                                    <h5>@item.Name</h5>
+                                </div>
+                                <div>
+                                    <p>@(item.Price)KR</p>
+                                </div>
+                            </div>
+                            <div class="col d-flex">
+                                <div class="me-auto">
+                                    <p>Antal: 0</p>
+                                </div>
+                                <div>
+                                    <button class="cart-body-button" @onclick="() => CartService.RemoveFromCart(item)"><Icon Name="IconName.Trash"></Icon></button>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="col d-flex justify-content-end">
+                                <p><strong>@(item.Price)KR</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="line"></div>
+                <div id="total-price" class="col d-flex">
+                    <div class="me-auto ms-5">
+                        <p>TOTAL</p>
+                    </div>
+                    <div class="me-5">
+                        <p>0KR</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    List<GetOrderDto> Orders { get; set; } = new();
+    GetCustomerDto Customer { get; set; } = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.GetCart();
+        await AccountService.GetAccount();
+        await LoadCustomer();
+    }
+
+    async Task LoadCustomer()
+    {
+        var httpClient = ClientFactory.CreateClient("storeApi");
+        var response = await httpClient.GetAsync("customers");
+        var customers = await response.Content.ReadFromJsonAsync<List<GetCustomerDto>>();
+        Customer = customers.FirstOrDefault(c => c.CustomerId == AccountService.Account.Id);
+    }
+
+    async Task PlaceOrder()
+    {
+        var order = new PostOrderDto
+        {
+            CustomerId = Customer.CustomerId,
+        };
+
+        await OrderService.PlaceOrder(order);
+
+        var lastOrder = OrderService.Orders.LastOrDefault();
+
+        foreach (var item in CartService.Cart)
+        {
+            var orderProducts = new PostOrderProductsDto()
+            {
+                OrderId = lastOrder.OrderId,
+                ProductId = item.ProductId,
+            };
+
+            await OrderService.AddProductToOrder(orderProducts);
+        }
+
+        CartService.Cart.Clear();
+        NavigationManager.NavigateTo("/OrderConfirmation");
+    }
+}
